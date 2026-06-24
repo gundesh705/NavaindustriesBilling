@@ -3,7 +3,7 @@ import { Plus, Search, Edit2, Trash2 } from "lucide-react";
 import { useSalary } from "../context/SalaryContext";
 
 export function Salary() {
-  const { labours, addLabour, updateLabour, deleteLabour } = useSalary();
+  const { labours, addLabour, updateLabour, deleteLabour, loading } = useSalary();
   const [searchTerm, setSearchTerm] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -13,18 +13,22 @@ export function Salary() {
     labour.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.salary || !formData.date) return;
 
-    if (editingId) {
-      updateLabour(editingId, formData.name, parseFloat(formData.salary), formData.date);
-      setEditingId(null);
-    } else {
-      addLabour(formData.name, parseFloat(formData.salary), formData.date);
+    try {
+      if (editingId) {
+        await updateLabour(editingId, formData.name, parseFloat(formData.salary), formData.date);
+        setEditingId(null);
+      } else {
+        await addLabour(formData.name, parseFloat(formData.salary), formData.date);
+      }
+      setFormData({ name: "", salary: "", date: "" });
+      setShowForm(false);
+    } catch (err) {
+      console.error('Error saving labour:', err);
     }
-    setFormData({ name: "", salary: "", date: "" });
-    setShowForm(false);
   };
 
   const handleEdit = (id: string, name: string, salary: number, date: string) => {
@@ -121,14 +125,16 @@ export function Salary() {
             <div className="flex gap-3">
               <button
                 type="submit"
-                className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium text-sm"
+                disabled={loading}
+                className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:bg-gray-500 transition-colors font-medium text-sm"
               >
-                {editingId ? "Update" : "Add"}
+                {loading ? "Saving..." : editingId ? "Update" : "Add"}
               </button>
               <button
                 type="button"
                 onClick={handleCancel}
-                className="px-4 py-2 bg-gray-100 text-gray-900 rounded-lg hover:bg-gray-200 transition-colors font-medium text-sm"
+                disabled={loading}
+                className="px-4 py-2 bg-gray-100 text-gray-900 rounded-lg hover:bg-gray-200 disabled:bg-gray-300 transition-colors font-medium text-sm"
               >
                 Cancel
               </button>
