@@ -39,12 +39,27 @@ export function Purchases() {
     setFormData({ productName: "", amount: "", date: "" });
   };
 
-  const totalPurchases = purchases.reduce((sum, purchase) => sum + purchase.amount, 0);
-
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-IN');
   };
+
+  const getMonthlyTotal = () => {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+
+    return filteredPurchases.reduce((sum, purchase) => {
+      const purchaseDate = new Date(purchase.date);
+      if (purchaseDate.getMonth() === currentMonth && purchaseDate.getFullYear() === currentYear) {
+        return sum + purchase.amount;
+      }
+      return sum;
+    }, 0);
+  };
+
+  const monthlyTotal = getMonthlyTotal();
+  const totalPurchases = purchases.reduce((sum, purchase) => sum + purchase.amount, 0);
 
   return (
     <div className="space-y-6 h-full flex flex-col">
@@ -191,9 +206,14 @@ export function Purchases() {
           </table>
         </div>
 
-        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex items-center justify-between text-sm text-gray-900 font-semibold">
-          <div>Total Purchases: ₹{totalPurchases.toLocaleString('en-IN')}</div>
-          <div className="text-gray-500">Showing {filteredPurchases.length} entries</div>
+        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50">
+          <div className="flex items-center justify-between text-sm">
+            <div>
+              <div className="text-gray-900 font-semibold">This Month's Purchases: ₹{monthlyTotal.toLocaleString('en-IN')}</div>
+              <div className="text-gray-500 text-xs mt-1">Total (All): ₹{totalPurchases.toLocaleString('en-IN')}</div>
+            </div>
+            <div className="text-gray-500">Showing {filteredPurchases.length} entries</div>
+          </div>
         </div>
       </div>
     </div>

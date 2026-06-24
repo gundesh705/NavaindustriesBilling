@@ -39,12 +39,27 @@ export function Salary() {
     setFormData({ name: "", salary: "", date: "" });
   };
 
-  const totalSalary = labours.reduce((sum, labour) => sum + labour.salary, 0);
-
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-IN');
   };
+
+  const getMonthlyTotal = () => {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+
+    return filteredLabours.reduce((sum, labour) => {
+      const labourDate = new Date(labour.date);
+      if (labourDate.getMonth() === currentMonth && labourDate.getFullYear() === currentYear) {
+        return sum + labour.salary;
+      }
+      return sum;
+    }, 0);
+  };
+
+  const monthlyTotal = getMonthlyTotal();
+  const totalSalary = labours.reduce((sum, labour) => sum + labour.salary, 0);
 
   return (
     <div className="space-y-6 h-full flex flex-col">
@@ -191,9 +206,14 @@ export function Salary() {
           </table>
         </div>
 
-        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex items-center justify-between text-sm text-gray-900 font-semibold">
-          <div>Total Salary: ₹{totalSalary.toLocaleString('en-IN')}</div>
-          <div className="text-gray-500">Showing {filteredLabours.length} entries</div>
+        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50">
+          <div className="flex items-center justify-between text-sm">
+            <div>
+              <div className="text-gray-900 font-semibold">This Month's Salary: ₹{monthlyTotal.toLocaleString('en-IN')}</div>
+              <div className="text-gray-500 text-xs mt-1">Total (All): ₹{totalSalary.toLocaleString('en-IN')}</div>
+            </div>
+            <div className="text-gray-500">Showing {filteredLabours.length} entries</div>
+          </div>
         </div>
       </div>
     </div>
